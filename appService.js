@@ -491,36 +491,6 @@ async function getAllMealPlans() {
         return [];
     });
 }
-
-// Count functions for dashboard stats
-async function countRecipes() {
-    return await withOracleDB(async (connection) => {
-        const result = await connection.execute('SELECT COUNT(*) FROM Recipe_Create');
-        return result.rows[0][0];
-    }).catch(() => 0);
-}
-
-async function countUsers() {
-    return await withOracleDB(async (connection) => {
-        const result = await connection.execute('SELECT COUNT(*) FROM Users');
-        return result.rows[0][0];
-    }).catch(() => 0);
-}
-
-async function countMealPlans() {
-    return await withOracleDB(async (connection) => {
-        const result = await connection.execute('SELECT COUNT(*) FROM MealPlan');
-        return result.rows[0][0];
-    }).catch(() => 0);
-}
-
-async function countIngredients() {
-    return await withOracleDB(async (connection) => {
-        const result = await connection.execute('SELECT COUNT(*) FROM Ingredient');
-        return result.rows[0][0];
-    }).catch(() => 0);
-}
-
 module.exports = {
     testOracleConnection,
     setupDatabase,
@@ -538,9 +508,5 @@ module.exports = {
     getRecipesByIngredient,
     getAllIngredients,
     getAllMealPlans,
-    getAllFollow,
-    countRecipes,
-    countUsers,
-    countMealPlans,
-    countIngredients
+    getAllFollow
 };

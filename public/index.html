@@ -4,385 +4,313 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MealPlanner Dashboard</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
-    <title>Meal Planning Dashboard</title>
 </head>
 
 <body>
-    <!-- Navigation Header -->
-    <nav class="navbar">
-        <div class="nav-brand">
-            <h1>🍽️ Meal Planning System</h1>
-        </div>
-        <div class="nav-links">
-            <a href="#recipes" onclick="showSection('recipes')">Recipes</a>
-            <a href="#users" onclick="showSection('users')">Users</a>
-            <a href="#mealplans" onclick="showSection('mealplans')">Meal Plans</a>
-            <a href="#analytics" onclick="showSection('analytics')">Analytics</a>
-        </div>
-    
-    </nav>
-
-    <!-- Main Container -->
-    <div class="container">
-        
-        <!-- Hero Section -->
-        <section id="hero" class="section active">
-            <div class="hero-content">
-                <h1>Welcome to Your Meal Planning Dashboard</h1>
-                <p>Manage recipes, track ingredients, and plan your meals efficiently</p>
-                <div class="hero-actions">
-                    <button class="btn-primary" onclick="showSection('recipes')">
-                        Explore Recipes
-                    </button>
-                    <button class="btn-secondary" onclick="showSection('mealplans')">
-                        View Meal Plans
-                    </button>
-                </div>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-leaf"></i>
+                <span>MealPlanner</span>
+            </div>
+            
+            <nav>
+                <div class="nav-label">Core Data</div>
+                <button class="nav-btn active" onclick="showTab('dashboard-view')">
+                    <i class="fa-solid fa-server"></i> Dashboard & Setup
+                </button>
+                <button class="nav-btn" onclick="showTab('q5')">
+                    <i class="fa-solid fa-users"></i> User Directory
+                </button>
                 
-                <!-- Quick Stats -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number" id="totalRecipes">0</div>
-                        <div class="stat-label">Total Recipes</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="totalUsers">0</div>
-                        <div class="stat-label">Active Users</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="totalMealPlans">0</div>
-                        <div class="stat-label">Meal Plans</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="totalIngredients">0</div>
-                        <div class="stat-label">Ingredients</div>
+                <div class="nav-label">Recipes & Meals</div>
+                <button class="nav-btn" onclick="showTab('q4')">
+                    <i class="fa-solid fa-magnifying-glass"></i> Search Recipes
+                </button>
+                <button class="nav-btn" onclick="showTab('q2')">
+                    <i class="fa-solid fa-pen-to-square"></i> Manage Recipes
+                </button>
+                <button class="nav-btn" onclick="showTab('q6')">
+                    <i class="fa-solid fa-carrot"></i> Ingredients
+                </button>
+                <button class="nav-btn" onclick="showTab('q3')">
+                    <i class="fa-solid fa-calendar-days"></i> Meal Plans
+                </button>
+
+                <div class="nav-label">Actions</div>
+                <button class="nav-btn" onclick="showTab('q1')">
+                    <i class="fa-solid fa-user-plus"></i> Follow User
+                </button>
+
+                <div class="nav-label">Analytics</div>
+                <button class="nav-btn" onclick="showTab('analytics-view')">
+                    <i class="fa-solid fa-chart-pie"></i> Reports & Stats
+                </button>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header>
+                <h2 id="page-title">Dashboard</h2>
+                <div class="connection-status">
+                    <span id="dbStatus">Checking...</span>
+                    <div id="loadingGif" class="spinner"></div>
+                </div>
+            </header>
+
+            <div class="content-scroll">
+
+                <div id="dashboard-view" class="tab-content active">
+                    <div class="card">
+                        <h3><i class="fa-solid fa-database"></i> Database Maintenance</h3>
+                        <p>Initialize or reset the application data state.</p>
+                        <div class="action-row">
+                            <button id="setupDatabase" class="btn-primary">
+                                <i class="fa-solid fa-rotate"></i> Reset / Initialize Database
+                            </button>
+                            <span id="setupDatabaseMsg" class="status-msg"></span>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
 
-        <!-- RECIPES SECTION -->
-        <section id="recipes" class="section">
-            <div class="section-header">
-                <h2>Recipe Management</h2>
-                <p>Search, filter, and discover delicious recipes</p>
-            </div>
-
-            <!-- Search & Filter Recipes -->
-            <div class="card">
-                <h3>🔍 Search Recipes</h3>
-                <form id="searchRecipesForm" class="form-grid">
-                    <div class="form-group">
-                        <label>Difficulty</label>
-                        <select id="searchDifficulty">
-                            <option value="">Any</option>
-                            <option value="Easy">Easy</option>
-                            <option value="Medium">Medium</option>
-                            <option value="Hard">Hard</option>
-                        </select>
+                <div id="q1" class="tab-content">
+                    <div class="card">
+                        <h3>Follow Management</h3>
+                        <p>Create relationships between users and meal plans.</p>
+                        <form id="insertFollowForm" class="modern-form">
+                            <div class="form-group">
+                                <label>User ID</label>
+                                <input type="number" id="followUsrId" placeholder="e.g. 101" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Meal Plan ID</label>
+                                <input type="number" id="followMid" placeholder="e.g. 500" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select id="followIsActive">
+                                    <option value="1">Active</option>
+                                    <option value="0">Inactive</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-primary">Add Follower</button>
+                        </form>
+                        <div id="insertFollowResult" class="result-box"></div>
+                        
+                        <div class="table-wrapper">
+                            <table id="followTable" class="modern-table">
+                                <thead>
+                                    <tr><th>User ID</th><th>MealPlan ID</th><th>IsActive</th></tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
-
-                    <div class="form-group">
-                        <label>Logic</label>
-                        <select id="searchLogic">
-                            <option value="AND">AND</option>
-                            <option value="OR">OR</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Temperature</label>
-                        <select id="searchServingTemp">
-                            <option value="">Any</option>
-                            <option value="Hot">Hot</option>
-                            <option value="Cold">Cold</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Logic</label>
-                        <select id="searchLogic2">
-                            <option value="AND">AND</option>
-                            <option value="OR">OR</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Created By User</label>
-                        <select id="UserID">
-                            <option value="">Any User</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <button type="submit" class="btn-primary">Search</button>
-                    </div>
-                </form>
-                <div id="searchRecipesResultMsg" class="result-msg"></div>
-                <div class="table-container">
-                    <table id="searchRecipesTable">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Difficulty</th>
-                                <th>Temperature</th>
-                                <th>Creator</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
                 </div>
-            </div>
 
-            <!-- Find by Ingredient -->
-            <div class="card">
-                <h3>🥕 Find Recipes by Ingredient</h3>
-                <form id="joinRecipesForm" class="inline-form">
-                    <select id="ingredientDropdown" required>
-                        <option value="">-- Select an ingredient --</option>
-                    </select>
-                    <button type="submit" class="btn-primary">Find Recipes</button>
-                </form>
-                <div id="joinRecipesResultMsg" class="result-msg"></div>
-                <div class="table-container">
-                    <table id="joinRecipesTable">
-                        <thead>
-                            <tr>
-                                <th>Recipe ID</th>
-                                <th>Recipe Name</th>
-                                <th>Difficulty</th>
-                                <th>Amount</th>
-                                <th>Unit</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
+                <div id="q2" class="tab-content">
+                    <div class="card">
+                        <h3>Edit Recipe Details</h3>
+                        <label>Select Recipe to Edit</label>
+                        <select id="recipeSelect" class="full-width-select"></select>
 
-            <!-- Update Recipe -->
-            <div class="card">
-                <h3>✏️ Update Recipe</h3>
-                <div class="form-group">
-                    <label>Select Recipe</label>
-                    <select id="recipeSelect"></select>
-                </div>
-                <form id="updateRecipeForm" class="form-grid">
-                    <div class="form-group">
-                        <label>New Name</label>
-                        <input type="text" id="updateRecipeName" placeholder="Leave blank to keep">
+                        <form id="updateRecipeForm" class="modern-form mt-4">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>New Name</label>
+                                    <input type="text" id="updateRecipeName" placeholder="Keep current">
+                                </div>
+                                <div class="form-group">
+                                    <label>New Difficulty</label>
+                                    <input type="text" id="updateRecipeDifficulty" placeholder="Easy, Medium, Hard">
+                                </div>
+                                <div class="form-group">
+                                    <label>New User ID</label>
+                                    <input type="number" id="updateRecipeUsrId" placeholder="Keep current">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-secondary">Update Recipe</button>
+                        </form>
+                        <div id="updateRecipeResult" class="result-box"></div>
                     </div>
-                    <div class="form-group">
-                        <label>New Difficulty</label>
-                        <input type="text" id="updateRecipeDifficulty" placeholder="Easy/Medium/Hard">
-                    </div>
-                    <div class="form-group">
-                        <label>New Creator User ID</label>
-                        <input type="number" id="updateRecipeUsrId" placeholder="Leave blank to keep">
-                    </div>
-                    <div class="form-group">
-                        <button type="submit" class="btn-primary">Update Recipe</button>
-                    </div>
-                </form>
-                <div id="updateRecipeResult" class="result-msg"></div>
-            </div>
-        </section>
-
-        <!-- USERS SECTION -->
-        <section id="users" class="section">
-            <div class="section-header">
-                <h2>User Management</h2>
-                <p>View and manage user profiles</p>
-            </div>
-
-            <!-- View Users with Custom Columns -->
-            <div class="card">
-                <h3>👥 View User Information</h3>
-                <form id="projectionForm">
-                    <div class="checkbox-group">
-                        <label><input type="checkbox" name="projCol" value="id" checked> ID</label>
-                        <label><input type="checkbox" name="projCol" value="name" checked> Name</label>
-                        <label><input type="checkbox" name="projCol" value="height"> Height</label>
-                        <label><input type="checkbox" name="projCol" value="weight"> Weight</label>
-                    </div>
-                    <button type="submit" class="btn-primary">View Users</button>
-                </form>
-                <div id="projectionResultMsg" class="result-msg"></div>
-                <div class="table-container">
-                    <table id="projectionTable">
-                        <thead id="projectionTableHead"></thead>
-                        <tbody id="projectionTableBody"></tbody>
-                    </table>
                 </div>
-            </div>
 
-            <!-- Users Following All Meal Plans -->
-            <div class="card">
-                <h3>⭐ Super Users</h3>
-                <p>Find users who are following <strong>all</strong> meal plans</p>
-                <button id="divisionBtn" class="btn-primary">Find Super Users</button>
-                <div id="divisionResultMsg" class="result-msg"></div>
-                <div class="table-container">
-                    <table id="divisionTable">
-                        <thead>
-                            <tr>
-                                <th>User ID</th>
-                                <th>Name</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- MEAL PLANS SECTION -->
-        <section id="mealplans" class="section">
-            <div class="section-header">
-                <h2>Meal Plan Management</h2>
-                <p>Create and manage meal plans for users</p>
-            </div>
-
-            <!-- Add User to Meal Plan -->
-            <div class="card">
-                <h3>➕ Add User to Meal Plan</h3>
-                <form id="insertFollowForm" class="form-grid">
-                    <div class="form-group">
-                        <label>User ID</label>
-                        <input type="number" id="followUsrId" required>
+                <div id="q3" class="tab-content">
+                    <div class="card danger-zone">
+                        <h3><i class="fa-solid fa-trash-can"></i> Delete Meal Plan</h3>
+                        <p>Warning: This will cascade delete related follow records.</p>
+                        <div class="input-group">
+                            <input type="number" id="deleteMealPlanId" placeholder="Enter Meal Plan ID">
+                            <button id="deleteMealPlanBtn" class="btn-danger">Delete</button>
+                        </div>
+                        <div id="deleteMealPlanResult" class="result-box"></div>
                     </div>
-                    <div class="form-group">
-                        <label>Meal Plan ID</label>
-                        <input type="number" id="followMid" required>
+                    
+                    <div class="card mt-4">
+                        <h3>Current Meal Plans</h3>
+                        <div class="table-wrapper">
+                            <table id="mealPlanTable" class="modern-table">
+                                <thead>
+                                    <tr><th>ID</th><th>Name</th><th>Meals/Week</th><th>Created</th></tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Active Status</label>
-                        <select id="followIsActive">
-                            <option value="1">Active (1)</option>
-                            <option value="0">Inactive (0)</option>
-                        </select>
+                </div>
+
+                <div id="q4" class="tab-content">
+                    <div class="card">
+                        <h3>Advanced Recipe Search</h3>
+                        <form id="searchRecipesForm" class="search-bar-grid">
+                            <select id="searchDifficulty">
+                                <option value="">Any Difficulty</option>
+                                <option value="Easy">Easy</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Hard">Hard</option>
+                            </select>
+                            
+                            <select id="searchLogic" class="logic-select">
+                                <option value="AND">AND</option>
+                                <option value="OR">OR</option>
+                            </select>
+                            
+                            <select id="searchServingTemp">
+                                <option value="">Any Temp</option>
+                                <option value="Hot">Hot</option>
+                                <option value="Cold">Cold</option>
+                            </select>
+
+                            <select id="searchLogic2" class="logic-select">
+                                <option value="AND">AND</option>
+                                <option value="OR">OR</option>
+                            </select>
+
+                            <select id="UserID">
+                                <option value="">Any Creator</option>
+                            </select>
+                            
+                            <button type="submit" class="btn-primary">Search</button>
+                        </form>
+                        <div id="searchRecipesResultMsg" class="status-msg"></div>
+                        
+                        <div class="table-wrapper">
+                            <table id="searchRecipesTable" class="modern-table">
+                                <thead>
+                                    <tr><th>ID</th><th>Name</th><th>Difficulty</th><th>Temp</th><th>UserID</th></tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <button type="submit" class="btn-primary">Add Follow</button>
+                </div>
+
+                <div id="q5" class="tab-content">
+                    <div class="card">
+                        <h3>User Directory</h3>
+                        <p>Customize the columns you wish to view.</p>
+                        <form id="projectionForm" class="checkbox-group">
+                            <label class="custom-checkbox"><input type="checkbox" name="projCol" value="id" checked> <span>ID</span></label>
+                            <label class="custom-checkbox"><input type="checkbox" name="projCol" value="name" checked> <span>Name</span></label>
+                            <label class="custom-checkbox"><input type="checkbox" name="projCol" value="height"> <span>Height</span></label>
+                            <label class="custom-checkbox"><input type="checkbox" name="projCol" value="weight"> <span>Weight</span></label>
+                            <button type="submit" class="btn-secondary small-btn">Apply View</button>
+                        </form>
+                        <div id="projectionResultMsg" class="status-msg"></div>
+                        <div class="table-wrapper">
+                            <table id="projectionTable" class="modern-table">
+                                <thead id="projectionTableHead"></thead>
+                                <tbody id="projectionTableBody"></tbody>
+                            </table>
+                        </div>
                     </div>
-                </form>
-                <div id="insertFollowResult" class="result-msg"></div>
-                <div class="table-container">
-                    <table id="followTable">
-                        <thead>
-                            <tr>
-                                <th>User ID</th>
-                                <th>Meal Plan ID</th>
-                                <th>Active</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
                 </div>
-            </div>
 
-            <!-- Delete Meal Plan -->
-            <div class="card">
-                <h3>🗑️ Delete Meal Plan</h3>
-                <div class="inline-form">
-                    <input type="number" id="deleteMealPlanId" placeholder="Enter Meal Plan ID">
-                    <button id="deleteMealPlanBtn" class="btn-danger">Delete</button>
+                <div id="q6" class="tab-content">
+                    <div class="card">
+                        <h3>Filter by Ingredient</h3>
+                        <form id="joinRecipesForm" class="input-group">
+                            <select id="ingredientDropdown" required>
+                                <option value="">-- Select Ingredient --</option>
+                            </select>
+                            <button type="submit" class="btn-primary">Find Recipes</button>
+                        </form>
+                        <div id="joinRecipesResultMsg" class="status-msg"></div>
+                        <div class="table-wrapper">
+                            <table id="joinRecipesTable" class="modern-table">
+                                <thead>
+                                    <tr><th>ID</th><th>Name</th><th>Difficulty</th><th>Amount</th><th>Unit</th></tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-                <div id="deleteMealPlanResult" class="result-msg"></div>
-                <div class="table-container">
-                    <table id="mealPlanTable">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Meals/Week</th>
-                                <th>Date Created</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+
+                <div id="analytics-view" class="tab-content">
+                    <div class="analytics-grid">
+                        
+                        <div class="card">
+                            <h3><i class="fa-solid fa-clock"></i> Total Prep Times</h3>
+                            <button id="sumRecipeTimes" class="btn-outline">Calculate Times</button>
+                            <div class="table-wrapper mini-table">
+                                <table id="sumRecipeTimesTable" class="modern-table">
+                                    <thead><tr><th>ID</th><th>Recipe</th><th>Total Mins</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h3><i class="fa-solid fa-filter"></i> Low Ingredient Count</h3>
+                            <form id="recipeIngredientCountFilter" class="input-group">
+                                <input type="number" id="maxRecipeIngredientCount" min="1" placeholder="Max Ingredients">
+                                <button type="submit" class="btn-outline">Filter</button>
+                            </form>
+                            <div class="table-wrapper mini-table">
+                                <table id="recipeIngredientCountTable" class="modern-table">
+                                    <thead><tr><th>ID</th><th>Name</th><th>Count</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="card full-width-card">
+                            <h3><i class="fa-solid fa-chart-line"></i> Efficiency Analysis</h3>
+                            <p>Meal plans with fewer than average recipes.</p>
+                            <button id="belowAverageRecipeCountMealPlans" class="btn-outline">Run Analysis</button>
+                            <div class="table-wrapper">
+                                <table id="belowAverageRecipeCountMealPlansTable" class="modern-table">
+                                    <thead><tr><th>ID</th><th>Plan Name</th><th>Recipe Count</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="card full-width-card highlight-card">
+                            <h3><i class="fa-solid fa-crown"></i> Super Users</h3>
+                            <p>Users who follow <strong>every</strong> available meal plan (Division Query).</p>
+                            <button id="divisionBtn" class="btn-primary">Identify Super Users</button>
+                            <div id="divisionResultMsg" class="status-msg"></div>
+                            <div class="table-wrapper">
+                                <table id="divisionTable" class="modern-table">
+                                    <thead><tr><th>ID</th><th>Name</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </section>
 
-        <!-- ANALYTICS SECTION -->
-        <section id="analytics" class="section">
-            <div class="section-header">
-                <h2>Analytics & Insights</h2>
-                <p>Discover patterns and trends in your meal planning data</p>
             </div>
-
-            <!-- Recipe Completion Times -->
-            <div class="card">
-                <h3>⏱️ Recipe Completion Times</h3>
-                <button id="sumRecipeTimes" class="btn-primary">Calculate Times</button>
-                <div id="sumRecipeTimeResultMsg" class="result-msg"></div>
-                <div class="table-container">
-                    <table id="sumRecipeTimesTable">
-                        <thead>
-                            <tr>
-                                <th>Recipe ID</th>
-                                <th>Name</th>
-                                <th>Total Time (min)</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Filter by Ingredient Count -->
-            <div class="card">
-                <h3>📊 Filter Recipes by Ingredients</h3>
-                <form id="recipeIngredientCountFilter" class="inline-form">
-                    <input type="number" id="maxRecipeIngredientCount" 
-                           placeholder="Max # of ingredients" min="1">
-                    <button type="submit" class="btn-primary">Find Recipes</button>
-                </form>
-                <div class="table-container">
-                    <table id="recipeIngredientCountTable">
-                        <thead>
-                            <tr>
-                                <th>Recipe ID</th>
-                                <th>Name</th>
-                                <th># of Ingredients</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Below Average Meal Plans -->
-            <div class="card">
-                <h3>📉 Below Average Meal Plans</h3>
-                <p>Find meal plans using fewer recipes than average</p>
-                <button id="belowAverageRecipeCountMealPlans" class="btn-primary">Analyze</button>
-                <div class="table-container">
-                    <table id="belowAverageRecipeCountMealPlansTable">
-                        <thead>
-                            <tr>
-                                <th>Meal Plan ID</th>
-                                <th>Name</th>
-                                <th># of Recipes</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
+        </main>
     </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <p>Meal Planning System | Database Application Project</p>
-    </footer>
 
     <script src="scripts.js"></script>
 </body>
-
 </html>

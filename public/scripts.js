@@ -1,108 +1,40 @@
 /*
- * These functions below are for various webpage functionalities. 
- * Each function serves to process data on the frontend:
- *      - Before sending requests to the backend.
- *      - After receiving responses from the backend.
- * 
- * To tailor them to your specific needs,
- * adjust or expand these functions to match both your 
- *   backend endpoints 
- * and 
- *   HTML structure.
- * 
+ * Updated scripts.js for Modern UI
+ * Backend logic preserved.
  */
-
-// Navigation between sections
-function showSection(sectionId) {
-    // Hide all sections
-    document.querySelectorAll('.section').forEach(section => {
-        section.classList.remove('active');
-    });
-    
-    // Show selected section
-    const targetSection = document.getElementById(sectionId);
-    if (targetSection) {
-        targetSection.classList.add('active');
-    }
-    
-    // If showing hero, load stats
-    if (sectionId === 'hero') {
-        loadDashboardStats();
-    }
-}
-
-// Load dashboard statistics
-async function loadDashboardStats() {
-    try {
-        // Total Recipes
-        const recipesRes = await fetch('/count-recipes');
-        const recipesData = await recipesRes.json();
-        if (recipesData.success) {
-            document.getElementById('totalRecipes').textContent = recipesData.count;
-        }
-
-        // Total Users
-        const usersRes = await fetch('/count-users');
-        const usersData = await usersRes.json();
-        if (usersData.success) {
-            document.getElementById('totalUsers').textContent = usersData.count;
-        }
-
-        // Total Meal Plans
-        const plansRes = await fetch('/count-mealplans');
-        const plansData = await plansRes.json();
-        if (plansData.success) {
-            document.getElementById('totalMealPlans').textContent = plansData.count;
-        }
-
-        // Total Ingredients
-        const ingredientsRes = await fetch('/count-ingredients');
-        const ingredientsData = await ingredientsRes.json();
-        if (ingredientsData.success) {
-            document.getElementById('totalIngredients').textContent = ingredientsData.count;
-        }
-    } catch (error) {
-        console.error('Error loading stats:', error);
-    }
-}
 
 // This function checks the database connection and updates its status on the frontend.
 async function checkDbConnection() {
     const statusElem = document.getElementById('dbStatus');
-    
-    // If element doesn't exist, just check connection silently
-    if (!statusElem) {
-        await fetch('/check-db-connection', { method: "GET" });
-        return;
-    }
+    const loadingGifElem = document.getElementById('loadingGif');
 
-    statusElem.textContent = '';
-    
+    // Show loading
+    loadingGifElem.style.display = 'inline-block';
+    statusElem.textContent = "Connecting...";
+
     const response = await fetch('/check-db-connection', {
         method: "GET"
     });
 
+    // Hide the loading GIF once the response is received.
+    loadingGifElem.style.display = 'none';
+
     response.text()
         .then((text) => {
-            if (text === 'connected') {
-                statusElem.textContent = '✓ Connected';
-                statusElem.style.background = '#10b981';
-            } else {
-                statusElem.textContent = '✗ Disconnected';
-                statusElem.style.background = '#ef4444';
-            }
+            statusElem.textContent = text === "connected" ? "Online" : "Offline";
+            statusElem.style.color = text === "connected" ? "#2e7d32" : "#dc2626";
         })
         .catch((error) => {
-            statusElem.textContent = '✗ Failed';
-            statusElem.style.background = '#ef4444';
+            statusElem.textContent = 'Connection Error';
+            statusElem.style.color = "#dc2626";
         });
 }
 
-
-//set up
+// set up
 async function setupDatabase() {
     const msg = document.getElementById("setupDatabaseMsg");
-    msg.textContent = "Running setup...";
+    msg.textContent = "Processing...";
+    msg.style.color = "blue";
 
     const response = await fetch("/setup-database", {
         method: "POST"
@@ -110,13 +42,15 @@ async function setupDatabase() {
 
     const result = await response.json();
     if (result.success) {
-        msg.textContent = "Database successfully created and populated!";
+        msg.textContent = "Database Initialized Successfully";
+        msg.style.color = "green";
     } else {
         msg.textContent = "Error: " + result.error;
+        msg.style.color = "red";
     }
 }
 
-//Insert
+// Insert Follow
 async function insertFollow(event) {
     event.preventDefault();
 
@@ -133,7 +67,8 @@ async function insertFollow(event) {
 
     const json = await res.json();
     if (json.success) {
-        msgDiv.textContent = "Follow relationship inserted successfully.";
+        msgDiv.textContent = "Success: Follow relationship created.";
+        msgDiv.style.color = "green";
         const table = document.getElementById("followTable");
         const tbody = table.querySelector("tbody");
     
@@ -154,11 +89,12 @@ async function insertFollow(event) {
             table.style.display = "table";
         }
     } else {
-        msgDiv.textContent = json.message || "Insert failed.";
+        msgDiv.textContent = "Error: " + (json.message || "Insert failed.");
+        msgDiv.style.color = "red";
     }
 }
 
-//helper for update
+// Helper for update
 async function loadRecipeList() {
     const res = await fetch("/fetch-recipes");
     const json = await res.json();
@@ -177,12 +113,12 @@ async function loadRecipeList() {
         // row: [id, name, difficulty, usrid]
         const opt = document.createElement("option");
         opt.value = row[0];
-        opt.textContent = `${row[0]} - ${row[1]} (Difficulty: ${row[2]}, User: ${row[3] ?? "NULL"})`;
+        opt.textContent = `${row[0]} - ${row[1]} (Diff: ${row[2]})`;
         dropdown.appendChild(opt);
     });
 }
 
-//update
+// Update Recipe
 async function updateRecipe(event) {
     event.preventDefault();
 
@@ -192,19 +128,15 @@ async function updateRecipe(event) {
     const usrid = document.getElementById("updateRecipeUsrId").value;
     const msgDiv = document.getElementById("updateRecipeResult");
 
-    // Frontend validation: difficulty cannot be an integer
+    // Frontend validation
     if (difficulty !== "") {
         const validSet = ["easy", "medium", "hard"];
-        
-        // user typed something numeric → reject
         if (!isNaN(difficulty)) {
-            msgDiv.textContent = "Difficulty cannot be a number. Please enter Easy, Medium, or Hard.";
+            msgDiv.textContent = "Difficulty cannot be a number.";
             return;
         }
-
-        // user typed something not in the allowed set → reject
         if (!validSet.includes(difficulty.toLowerCase())) {
-            msgDiv.textContent = "Difficulty must be one of: Easy, Medium, Hard.";
+            msgDiv.textContent = "Difficulty must be: Easy, Medium, or Hard.";
             return;
         }
     }
@@ -218,14 +150,15 @@ async function updateRecipe(event) {
     const json = await res.json();
     if (json.success) {
         msgDiv.textContent = "Recipe updated successfully.";
-        // Refresh dropdown to show updated values
+        msgDiv.style.color = "green";
         loadRecipeList();
     } else {
         msgDiv.textContent = json.message || "Update failed.";
+        msgDiv.style.color = "red";
     }
 }
 
-//delete
+// Delete Meal Plan
 async function deleteMealPlan() {
     const id = document.getElementById("deleteMealPlanId").value;
     const msgDiv = document.getElementById("deleteMealPlanResult");
@@ -235,7 +168,6 @@ async function deleteMealPlan() {
         return;
     }
 
-    // Perform delete
     const res = await fetch("/delete-mealplan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -245,15 +177,16 @@ async function deleteMealPlan() {
     const json = await res.json();
     if (!json.success) {
         msgDiv.textContent = "Meal plan not found or delete failed.";
+        msgDiv.style.color = "red";
         return;
     }
 
     msgDiv.textContent = "Meal plan deleted successfully.";
+    msgDiv.style.color = "green";
 
-    // Fetch updated table
+    // Refresh Table
     const tableRes = await fetch("/get-all-mealplans");
     const tableJson = await tableRes.json();
-
     const table = document.getElementById("mealPlanTable");
     const tbody = table.querySelector("tbody");
     tbody.innerHTML = "";
@@ -268,15 +201,11 @@ async function deleteMealPlan() {
             });
             tbody.appendChild(tr);
         });
-
         table.style.display = "table";
-    } else {
-        table.style.display = "none";
     }
 }
 
-
-// Query 4: Search Recipes with Selection
+// Query 4: Search Recipes
 async function searchRecipes(event) {
     event.preventDefault();
 
@@ -286,25 +215,15 @@ async function searchRecipes(event) {
     const logic2 = document.getElementById('searchLogic2').value;
     const userID = document.getElementById('UserID').value;
 
-    // Validate at least one criterion is selected
     if (!difficulty && !servingTemp && !userID) {
-        document.getElementById('searchRecipesResultMsg').textContent = 
-            "Please select at least one search criterion!";
+        document.getElementById('searchRecipesResultMsg').textContent = "Please select at least one criterion.";
         return;
     }
 
     const response = await fetch('/search-recipes', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            difficulty: difficulty,
-            logic: logic,
-            servingTemp: servingTemp,
-            logic2: logic2,
-            userID: userID
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ difficulty, logic, servingTemp, logic2, userID })
     });
 
     const responseData = await response.json();
@@ -313,9 +232,7 @@ async function searchRecipes(event) {
     const tableBody = tableElement.querySelector('tbody');
 
     if (responseData.success) {
-        messageElement.textContent = `Found ${responseData.data.length} recipe(s)!`;
-        
-        // Clear previous results
+        messageElement.textContent = `Found ${responseData.data.length} recipe(s).`;
         tableBody.innerHTML = '';
         
         if (responseData.data.length > 0) {
@@ -329,53 +246,43 @@ async function searchRecipes(event) {
             });
         } else {
             tableElement.style.display = 'none';
-            messageElement.textContent = "No recipes found matching your criteria.";
         }
     } else {
         messageElement.textContent = "Error searching recipes!";
-        tableElement.style.display = 'none';
     }
 }
 
-// Load users into dropdown for Query 4
+// Load users for Search
 async function loadUsersForSearch() {
-    const response = await fetch('/get-all-users', {
-        method: 'GET'
-    });
-
+    const response = await fetch('/get-all-users', { method: 'GET' });
     const responseData = await response.json();
     const userSelect = document.getElementById('UserID');
 
     if (responseData.success) {
         responseData.data.forEach(user => {
             const option = document.createElement('option');
-            option.value = user[0]; // User ID
-            option.textContent = `${user[0]} - ${user[1]}`; // ID - Name
+            option.value = user[0]; 
+            option.textContent = `${user[0]} - ${user[1]}`;
             userSelect.appendChild(option);
         });
     }
 }
 
-
-// Query 5: Projection - View Users with Selected Columns
+// Query 5: Projection
 async function viewUsersProjection(event) {
     event.preventDefault();
-
     const checkboxes = document.querySelectorAll('input[name="projCol"]:checked');
     const columns = Array.from(checkboxes).map(cb => cb.value);
-
     const messageElement = document.getElementById('projectionResultMsg');
     
     if (columns.length === 0) {
-        messageElement.textContent = "Please select at least one column!";
+        messageElement.textContent = "Select at least one column.";
         return;
     }
 
     const response = await fetch('/project-users', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ columns: columns })
     });
 
@@ -383,19 +290,15 @@ async function viewUsersProjection(event) {
 
     if (responseData.success) {
         messageElement.textContent = `Displaying ${responseData.data.length} user(s)`;
-        
         const tableElement = document.getElementById('projectionTable');
         const tableHead = document.getElementById('projectionTableHead');
         const tableBody = document.getElementById('projectionTableBody');
         
-        // Clear previous results
         tableHead.innerHTML = '';
         tableBody.innerHTML = '';
         
         if (responseData.data.length > 0) {
             tableElement.style.display = 'table';
-            
-            // Create header row
             const headerRow = document.createElement('tr');
             columns.forEach(col => {
                 const th = document.createElement('th');
@@ -404,7 +307,6 @@ async function viewUsersProjection(event) {
             });
             tableHead.appendChild(headerRow);
             
-            // Create data rows
             responseData.data.forEach(row => {
                 const dataRow = tableBody.insertRow();
                 row.forEach(field => {
@@ -412,50 +314,33 @@ async function viewUsersProjection(event) {
                     cell.textContent = field;
                 });
             });
-        } else {
-            tableElement.style.display = 'none';
-            messageElement.textContent = "No users found.";
         }
-    } else {
-        messageElement.textContent = "Error fetching user data!";
-        document.getElementById('projectionTable').style.display = 'none';
     }
 }
 
-
-// Query 6: Load ingredients into dropdown (HELPER)
+// Query 6: Load ingredients
 async function loadIngredients() {
-    const response = await fetch('/get-all-ingredients', {
-        method: 'GET'
-    });
-
+    const response = await fetch('/get-all-ingredients', { method: 'GET' });
     const responseData = await response.json();
     const dropdown = document.getElementById('ingredientDropdown');
     
     if (responseData.success && responseData.data.length > 0) {
         responseData.data.forEach(ingredient => {
             const option = document.createElement('option');
-            option.value = ingredient[0]; // Ingredient name
-            option.textContent = ingredient[0]; // Display name
+            option.value = ingredient[0];
+            option.textContent = ingredient[0];
             dropdown.appendChild(option);
         });
-    } else {
-        const option = document.createElement('option');
-        option.value = "";
-        option.textContent = "No ingredients found";
-        dropdown.appendChild(option);
     }
 }
 
-// Query 6: Find Recipes by Selected Ingredient
+// Query 6: Find Recipes
 async function findRecipesByIngredient(event) {
     event.preventDefault();
-
     const ingredientName = document.getElementById('ingredientDropdown').value;
     
     if (!ingredientName) {
-        document.getElementById('joinRecipesResultMsg').textContent = 
-            "Please select an ingredient!";
+        document.getElementById('joinRecipesResultMsg').textContent = "Select an ingredient.";
         return;
     }
 
@@ -469,10 +354,8 @@ async function findRecipesByIngredient(event) {
     const tableBody = tableElement.querySelector('tbody');
 
     if (responseData.success) {
-        messageElement.textContent = `Found ${responseData.data.length} recipe(s) using "${ingredientName}"`;
-        
+        messageElement.textContent = `Found ${responseData.data.length} recipe(s).`;
         tableBody.innerHTML = '';
-        
         if (responseData.data.length > 0) {
             tableElement.style.display = 'table';
             responseData.data.forEach(recipe => {
@@ -482,131 +365,92 @@ async function findRecipesByIngredient(event) {
                     cell.textContent = field;
                 });
             });
-        } else {
-            tableElement.style.display = 'none';
-            messageElement.textContent = `No recipes found using ingredient: "${ingredientName}"`;
         }
-    } else {
-        messageElement.textContent = "Error searching recipes!";
-        tableElement.style.display = 'none';
     }
 }
 
-
-//Query 7: Aggregation - Sum total recipe time
+// Query 7: Sum times
 const sumRecipeTimes = async () => {
-    const response = await fetch('/sum-recipe-times', {
-        method: 'GET'
-    })
-
+    const response = await fetch('/sum-recipe-times', { method: 'GET' })
     const responseJson = await response.json();
-    const responseData = responseJson.data;
-    const tableElement = document.getElementById('sumRecipeTimesTable');
-    const tableBody = tableElement.querySelector('tbody');
+    const tableBody = document.querySelector('#sumRecipeTimesTable tbody');
 
-    if (tableBody) {
-        tableBody.innerHTML = ''; //Reset the table
-    }
+    if (tableBody) tableBody.innerHTML = '';
 
     if (responseJson.success) {
-        responseData.forEach((recipe) => {
+        responseJson.data.forEach((recipe) => {
             const row = tableBody.insertRow()
             recipe.forEach((val, index) => {
                 const cell = row.insertCell(index);
                 cell.textContent = val;
             })
         })
-    } else {
-        alert("Error when fetching the recipe times; please try again")
     }
 }
 
-//Query 8: Recipe ingredient count filter
+// Query 8: Filter count
 const recipeIngredientCountFilter = async (event) => {
-    event.preventDefault();// PREVENT REFRESH
+    event.preventDefault();
     const maxIngredients = +document.getElementById('maxRecipeIngredientCount').value
-    console.log(maxIngredients)
-
-    if (!maxIngredients || !Number.isInteger(maxIngredients) || maxIngredients < 1) {
-        alert("Max Ingredients must be an integer > 0, please try again")
+    
+    if (!maxIngredients || maxIngredients < 1) {
+        alert("Please enter a valid number > 0");
+        return;
     }
 
-    const response = await fetch(`/recipe-ingredient-count-filter?maxIngredients=${maxIngredients}`, {
-        method: 'GET'
-    });
-
+    const response = await fetch(`/recipe-ingredient-count-filter?maxIngredients=${maxIngredients}`, { method: 'GET' });
     const responseJson = await response.json();
-    const responseData = responseJson.data;
-    const tableElement = document.getElementById('recipeIngredientCountTable');
-    const tableBody = tableElement.querySelector('tbody');
+    const tableBody = document.querySelector('#recipeIngredientCountTable tbody');
 
-    if (tableBody) {
-        tableBody.innerHTML = ''; //Reset the table
-    }
+    if (tableBody) tableBody.innerHTML = '';
 
     if (responseJson.success) {
-        responseData.forEach((res) => {
+        responseJson.data.forEach((res) => {
             const row = tableBody.insertRow()
             res.forEach((val, index) => {
                 const cell = row.insertCell(index);
                 cell.textContent = val;
             })
         })
-    } else {
-        alert("Error when querying, please try again")
     }
 }
 
-//Query 9 - Nested aggregation with group by.
+// Query 9: Average
 const belowAverageRecipeCountMealPlans = async () => {
-    const response = await fetch('/below-average-recipe-count-meal-plans', {
-        method: 'GET'
-    })
-
+    const response = await fetch('/below-average-recipe-count-meal-plans', { method: 'GET' })
     const responseJson = await response.json();
-    const responseData = responseJson.data;
-    const tableElement = document.getElementById('belowAverageRecipeCountMealPlansTable');
-    const tableBody = tableElement.querySelector('tbody');
+    const tableBody = document.querySelector('#belowAverageRecipeCountMealPlansTable tbody');
 
-    if (tableBody) {
-        tableBody.innerHTML = ''; //Reset the table
-    }
+    if (tableBody) tableBody.innerHTML = '';
 
     if (responseJson.success) {
-        responseData.forEach((recipe) => {
+        responseJson.data.forEach((recipe) => {
             const row = tableBody.insertRow()
             recipe.forEach((val, index) => {
                 const cell = row.insertCell(index);
                 cell.textContent = val;
             })
         })
-    } else {
-        alert("Error when fetching the recipe times; please try again")
     }
 }
 
-//division
+// Query 10: Division
 async function runDivisionQuery() {
     const res = await fetch("/division-users-following-all-mealplans");
     const json = await res.json();
-
     const tbody = document.querySelector("#divisionTable tbody");
     const msgDiv = document.getElementById("divisionResultMsg");
 
     tbody.innerHTML = "";
-
     if (!json.success) {
-        msgDiv.textContent = "Error running division query.";
+        msgDiv.textContent = "Error running query.";
         return;
     }
-
-    const rows = json.rows;
-    if (rows.length === 0) {
-        msgDiv.textContent = "No users follow all meal plans.";
+    if (json.rows.length === 0) {
+        msgDiv.textContent = "No active users found following all plans.";
         return;
     }
-
-    rows.forEach((row) => {
+    json.rows.forEach((row) => {
         const tr = document.createElement("tr");
         row.forEach((val) => {
             const td = document.createElement("td");
@@ -615,29 +459,52 @@ async function runDivisionQuery() {
         });
         tbody.appendChild(tr);
     });
-
-    msgDiv.textContent = "";
+    msgDiv.textContent = "Query Successful";
 }
 
+/* UI Logic for Sidebar and Tabs */
 function showTab(id) {
     // Hide all tab contents
     document.querySelectorAll('.tab-content').forEach(div => {
-        div.style.display = 'none';
+        div.classList.remove('active');
     });
 
     // Show selected tab
-    document.getElementById(id).style.display = 'block';
+    const selectedTab = document.getElementById(id);
+    if(selectedTab) selectedTab.classList.add('active');
+
+    // Update Sidebar active state
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+        // Simple check: if the button onclick contains the ID
+        if(btn.getAttribute('onclick').includes(id)) {
+            btn.classList.add('active');
+        }
+    });
+
+    // Update Header Title based on ID
+    const titles = {
+        'dashboard-view': 'Dashboard',
+        'q1': 'User Management',
+        'q2': 'Recipe Editor',
+        'q3': 'Meal Plans',
+        'q4': 'Search',
+        'q5': 'Directory',
+        'q6': 'Ingredients',
+        'analytics-view': 'Analytics & Reports'
+    };
+    document.getElementById('page-title').textContent = titles[id] || 'NutriPlan';
 }
 
-// ---------------------------------------------------------------
-// Initializes the webpage functionalities.
-// Add or remove event listeners based on the desired functionalities.
+// Initialize
 window.onload = function () {
-    showSection('hero');
-    loadDashboardStats();
+    // Start on Dashboard instead of Q1
+    showTab('dashboard-view');
     checkDbConnection();
     loadUsersForSearch();
     loadIngredients();
+
+    // Event Listeners
     document.getElementById("sumRecipeTimes").addEventListener("click", sumRecipeTimes);
     document.getElementById("recipeIngredientCountFilter").addEventListener("submit", recipeIngredientCountFilter);
     document.getElementById("belowAverageRecipeCountMealPlans").addEventListener("click", belowAverageRecipeCountMealPlans);
@@ -649,5 +516,6 @@ window.onload = function () {
     document.getElementById("searchRecipesForm").addEventListener("submit", searchRecipes);
     document.getElementById("projectionForm").addEventListener("submit", viewUsersProjection);
     document.getElementById("joinRecipesForm").addEventListener("submit", findRecipesByIngredient);
+    
     loadRecipeList();
 };

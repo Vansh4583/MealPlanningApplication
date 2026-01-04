@@ -1,0 +1,183 @@
+CREATE TABLE HeightWeightCalories (
+    Height DECIMAL,
+    Weight DECIMAL,
+    MaintenanceCalorie INTEGER NOT NULL,
+    PRIMARY KEY (Height, Weight)
+);
+
+CREATE TABLE Users (
+    Id INTEGER PRIMARY KEY,
+    Height DECIMAL NOT NULL,
+    Weight DECIMAL NOT NULL,
+    Name VARCHAR(50) NOT NULL,
+    FOREIGN KEY (Height, Weight) REFERENCES HeightWeightCalories(Height, Weight)
+        ON DELETE NO ACTION ON UPDATE CASCADE
+);
+
+CREATE TABLE DietaryRestriction (
+    Id INTEGER PRIMARY KEY,
+    Name VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE Allergy (
+    Id INTEGER PRIMARY KEY,
+    Severity VARCHAR(20) NOT NULL,
+    FOREIGN KEY (Id) REFERENCES DietaryRestriction(Id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Preference (
+    Id INTEGER PRIMARY KEY,
+    Type VARCHAR(50) NOT NULL,
+    FOREIGN KEY (Id) REFERENCES DietaryRestriction(Id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE MealPlan (
+    Id INTEGER PRIMARY KEY,
+    Name VARCHAR(50) NOT NULL,
+    MealsPerWeek INTEGER NOT NULL,
+    DateCreated DATE
+);
+
+CREATE TABLE Has (
+    uId INTEGER,
+    dId INTEGER,
+    IsActive BOOLEAN NOT NULL,
+    PRIMARY KEY (uId, dId),
+    FOREIGN KEY (uId) REFERENCES Users(Id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (dId) REFERENCES DietaryRestriction(Id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Follow (
+    uId INTEGER,
+    mId INTEGER,
+    IsActive BOOLEAN NOT NULL,
+    PRIMARY KEY (uId, mId),
+    FOREIGN KEY (uId) REFERENCES Users(Id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (mId) REFERENCES MealPlan(Id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE DishServingTemperatures (
+    Name VARCHAR(50) PRIMARY KEY,
+    ServingTemperature VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE Recipe_Create (
+    Id INTEGER PRIMARY KEY,
+    Name VARCHAR(50) NOT NULL,
+    Difficulty VARCHAR(20) NOT NULL,
+    uId INTEGER,
+    FOREIGN KEY (uId) REFERENCES Users(Id)
+        ON DELETE SET NULL ON UPDATE CASCADE,
+    FOREIGN KEY (Name) REFERENCES DishServingTemperatures(Name)
+        ON DELETE NO ACTION ON UPDATE CASCADE
+);
+
+CREATE TABLE RecipeStep (
+    Id INTEGER,
+    OrderNumber INTEGER,
+    Description VARCHAR(5000) NOT NULL,
+    TimeToComplete INTEGER NOT NULL,
+    PRIMARY KEY (Id, OrderNumber),
+    FOREIGN KEY (Id) REFERENCES Recipe_Create(Id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE SizeMicrowaveTimes (
+    Size VARCHAR(20),
+    NeedsReheating BOOLEAN,
+    MicrowaveTime INTEGER NOT NULL,
+    PRIMARY KEY (Size, NeedsReheating)
+);
+
+CREATE TABLE ScheduledMeal_MadeFrom (
+    Id INTEGER PRIMARY KEY,
+    MealType VARCHAR(50) NOT NULL,
+    Servings INTEGER NOT NULL,
+    dayOfWeek VARCHAR(20) NOT NULL,
+    rId INTEGER,
+    Size VARCHAR(20) NOT NULL,
+    NeedsReheating BOOLEAN NOT NULL,
+    FOREIGN KEY (rId) REFERENCES Recipe_Create(Id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (Size, NeedsReheating) REFERENCES SizeMicrowaveTimes(Size, NeedsReheating)
+        ON DELETE NO ACTION ON UPDATE CASCADE
+);
+
+CREATE TABLE PerishableCategories (
+    Category VARCHAR(50) PRIMARY KEY,
+    IsPerishable BOOLEAN NOT NULL
+);
+
+CREATE TABLE FoodCategory (
+    Name VARCHAR(50) PRIMARY KEY,
+    Category VARCHAR(50) NOT NULL,
+    FOREIGN KEY (Category) REFERENCES PerishableCategories(Category)
+        ON DELETE NO ACTION ON UPDATE CASCADE
+);
+
+CREATE TABLE Ingredient (
+    Id INTEGER PRIMARY KEY,
+    Name VARCHAR(50) NOT NULL,
+    FOREIGN KEY (Name) REFERENCES FoodCategory(Name)
+        ON DELETE NO ACTION ON UPDATE CASCADE
+);
+
+CREATE TABLE PartOf (
+    dId INTEGER,
+    iId INTEGER,
+    PRIMARY KEY (dId, iId),
+    FOREIGN KEY (dId) REFERENCES DietaryRestriction(Id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (iId) REFERENCES Ingredient(Id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE RecipeUsedIngredients (
+    rId INTEGER,
+    iId INTEGER,
+    Unit VARCHAR(20) NOT NULL,
+    Amount INTEGER NOT NULL,
+    PRIMARY KEY (rId, iId),
+    FOREIGN KEY (rId) REFERENCES Recipe_Create(Id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (iId) REFERENCES Ingredient(Id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE PoweredTools (
+    Name VARCHAR(20) PRIMARY KEY,
+    PowerNeeded BOOLEAN NOT NULL
+);
+
+CREATE TABLE MicrowavableMaterials (
+    Material VARCHAR(20) PRIMARY KEY,
+    IsMicrowavable BOOLEAN NOT NULL
+);
+
+CREATE TABLE KitchenTool (
+    Id INTEGER PRIMARY KEY,
+    Name VARCHAR(50) NOT NULL,
+    Size VARCHAR(20) NOT NULL,
+    Material VARCHAR(20) NOT NULL,
+    FOREIGN KEY (Name) REFERENCES PoweredTools(Name)
+        ON DELETE NO ACTION ON UPDATE CASCADE,
+    FOREIGN KEY (Material) REFERENCES MicrowavableMaterials(Material)
+        ON DELETE NO ACTION ON UPDATE CASCADE
+);
+
+CREATE TABLE Require (
+    rId INTEGER,
+    kId INTEGER,
+    Quantity INTEGER NOT NULL,
+    PRIMARY KEY (rId, kId),
+    FOREIGN KEY (rId) REFERENCES Recipe_Create(Id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (kId) REFERENCES KitchenTool(Id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);

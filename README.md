@@ -57,7 +57,7 @@ Relationships include:
 
 
 
-![Descriptive alt text for the image](screenshots\1.jpg)
-![Descriptive alt text for the image](screenshots\2.jpg)
+![Descriptive alt text for the image](screenshots/1.jpg)
+![Descriptive alt text for the image](screenshots/2.jpg)
 
 

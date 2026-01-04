@@ -12,27 +12,89 @@
  * 
  */
 
+// Navigation between sections
+function showSection(sectionId) {
+    // Hide all sections
+    document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+    });
+    
+    // Show selected section
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+        targetSection.classList.add('active');
+    }
+    
+    // If showing hero, load stats
+    if (sectionId === 'hero') {
+        loadDashboardStats();
+    }
+}
+
+// Load dashboard statistics
+async function loadDashboardStats() {
+    try {
+        // Total Recipes
+        const recipesRes = await fetch('/count-recipes');
+        const recipesData = await recipesRes.json();
+        if (recipesData.success) {
+            document.getElementById('totalRecipes').textContent = recipesData.count;
+        }
+
+        // Total Users
+        const usersRes = await fetch('/count-users');
+        const usersData = await usersRes.json();
+        if (usersData.success) {
+            document.getElementById('totalUsers').textContent = usersData.count;
+        }
+
+        // Total Meal Plans
+        const plansRes = await fetch('/count-mealplans');
+        const plansData = await plansRes.json();
+        if (plansData.success) {
+            document.getElementById('totalMealPlans').textContent = plansData.count;
+        }
+
+        // Total Ingredients
+        const ingredientsRes = await fetch('/count-ingredients');
+        const ingredientsData = await ingredientsRes.json();
+        if (ingredientsData.success) {
+            document.getElementById('totalIngredients').textContent = ingredientsData.count;
+        }
+    } catch (error) {
+        console.error('Error loading stats:', error);
+    }
+}
 
 // This function checks the database connection and updates its status on the frontend.
 async function checkDbConnection() {
     const statusElem = document.getElementById('dbStatus');
-    const loadingGifElem = document.getElementById('loadingGif');
+    
+    // If element doesn't exist, just check connection silently
+    if (!statusElem) {
+        await fetch('/check-db-connection', { method: "GET" });
+        return;
+    }
 
+    statusElem.textContent = '';
+    
     const response = await fetch('/check-db-connection', {
         method: "GET"
     });
 
-    // Hide the loading GIF once the response is received.
-    loadingGifElem.style.display = 'none';
-    // Display the statusElem's text in the placeholder.
-    statusElem.style.display = 'inline';
-
     response.text()
         .then((text) => {
-            statusElem.textContent = text;
+            if (text === 'connected') {
+                statusElem.textContent = '✓ Connected';
+                statusElem.style.background = '#10b981';
+            } else {
+                statusElem.textContent = '✗ Disconnected';
+                statusElem.style.background = '#ef4444';
+            }
         })
         .catch((error) => {
-            statusElem.textContent = 'connection timed out';  // Adjust error handling if required.
+            statusElem.textContent = '✗ Failed';
+            statusElem.style.background = '#ef4444';
         });
 }
 
@@ -571,7 +633,8 @@ function showTab(id) {
 // Initializes the webpage functionalities.
 // Add or remove event listeners based on the desired functionalities.
 window.onload = function () {
-    showTab('q1');
+    showSection('hero');
+    loadDashboardStats();
     checkDbConnection();
     loadUsersForSearch();
     loadIngredients();

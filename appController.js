@@ -189,4 +189,25 @@ router.get("/division-users-following-all-mealplans", async (req, res) => {
     res.json({ success: true, rows });
 });
 
+// Count endpoints for dashboard stats
+router.get('/count-recipes', async (req, res) => {
+    const count = await appService.countRecipes();
+    res.json({ success: true, count: count });
+});
+
+router.get('/count-users', async (req, res) => {
+    const count = await appService.countUsers();
+    res.json({ success: true, count: count });
+});
+
+router.get('/count-mealplans', async (req, res) => {
+    const count = await appService.countMealPlans();
+    res.json({ success: true, count: count });
+});
+
+router.get('/count-ingredients', async (req, res) => {
+    const count = await appService.countIngredients();
+    res.json({ success: true, count: count });
+});
+
 module.exports = router;

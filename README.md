@@ -61,3 +61,83 @@ Relationships include:
 ![Descriptive alt text for the image](screenshots/2.jpg)
 
 
+# Setup & Installation
+
+## Prerequisites
+
+Before you begin, make sure you have the following installed:
+
+* **Node.js** (v14 or higher)
+* **Oracle Database** (local installation or remote access)
+* **Oracle Instant Client** (properly configured in your system PATH)
+
+---
+
+## 1. Clone & Install
+
+Clone the repository and install dependencies:
+
+```bash
+git clone <your-repo-url>
+cd meal-planning-app
+npm install
+```
+
+---
+
+## 2. Configure Database Connection
+
+Create a `.env` file in the root directory of the project and add your Oracle database credentials:
+
+```env
+ORACLE_USER=your_username
+ORACLE_PASS=your_password
+ORACLE_HOST=localhost
+ORACLE_PORT=1521
+ORACLE_DBNAME=XEPDB1
+PORT=65534
+```
+
+> Adjust these values according to your Oracle database setup.
+
+---
+
+## 3. Initialize Database
+
+Run the SQL script to create tables and insert sample data.
+
+1. Open SQL*Plus:
+
+```bash
+sqlplus your_username/your_password@localhost:1521/XEPDB1
+```
+
+2. Execute the SQL script:
+
+```sql
+@CreateAndPopulate.sql
+```
+
+3. Exit SQL*Plus:
+
+```sql
+exit
+```
+
+---
+
+## 4. Start the Application
+
+Start the Node.js server:
+
+```bash
+node server.js
+```
+
+Once the server is running, open your browser and visit:
+
+```
+http://localhost:65534
+```
+
+
